@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2f8f6b">
+<title>دفترچه خوراک من</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#f3f7f4;--c:#fff;--t:#1c2a24;--m:#66776e;--p:#2f8f6b;--p2:#e0f1e8;--b:#dbe5df;--r:#d64545;color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root{--bg:#111815;--c:#1a2420;--t:#e6efe9;--m:#97aaa0;--p:#47b88c;--p2:#1f362c;--b:#2a3932;--r:#ff7b7b}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--t);font:16px/1.7 Vazirmatn,Tahoma,"Noto Sans Arabic",system-ui,sans-serif;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+main{max-width:640px;margin:auto;padding:16px}
+h1{margin:.1em 0;font-size:28px}h2{margin:0 0 12px;font-size:22px}h3{margin:20px 0 8px;font-size:15px;color:var(--m);font-weight:600}
+.card{background:var(--c);border:1px solid var(--b);border-radius:16px;padding:14px;margin:0 0 10px}
+.wr{border-color:var(--r);color:var(--r)}.m{color:var(--m)}small{font-size:13px}
+.btn{display:block;width:100%;border:0;border-radius:14px;background:var(--p);color:#fff;font:inherit;font-weight:700;padding:12px;margin:10px 0;min-height:50px}
+.big{font-size:21px;padding:20px}.gh{background:var(--p2);color:var(--p)}.dg{background:var(--r);color:#fff}
+.row{display:flex;gap:8px;align-items:center}.row>*{min-width:0}.row .btn{width:auto;flex:1}
+.en{display:flex;gap:10px;align-items:center}.bd{flex:1;min-width:0}.tm{color:var(--p);font-size:17px}
+.ic{border:0;background:none;color:var(--m);font-size:22px;min-width:40px;min-height:44px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--b);background:var(--c);color:var(--t);border-radius:99px;padding:6px 16px;font:inherit;min-height:44px}
+.chip.sel{background:var(--p);color:#fff;border-color:var(--p)}
+.in{width:100%;border:1px solid var(--b);border-radius:12px;background:var(--c);color:var(--t);font:inherit;padding:8px 10px;min-height:46px}
+.ir{display:grid;grid-template-columns:1fr 1fr 1fr 44px;gap:6px;margin-bottom:12px}.ir .nm{grid-column:1/4}
+nav{position:fixed;bottom:0;inset-inline:0;display:flex;background:var(--c);border-top:1px solid var(--b);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;color:var(--m);font:inherit;font-size:12px;line-height:1.4;padding:8px 0;min-height:56px}nav .on{color:var(--p);font-weight:700}
+.sheet{position:fixed;inset:0;background:var(--bg);overflow:auto;z-index:5;padding:16px 16px 120px}.sheet>*{max-width:640px;margin-inline:auto}
+.ft{position:fixed;bottom:0;inset-inline:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--b)}.ft .btn{margin:0}
+.ov{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;z-index:9;padding:20px}.dlg{background:var(--c);border-radius:18px;padding:18px;max-width:420px;width:100%}
+.bars{display:flex;align-items:flex-end;gap:3px;height:130px}.col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:11px;color:var(--m)}.bar{width:100%;background:var(--p);border-radius:4px 4px 0 0;min-height:2px}
+#ts{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#26332d;color:#fff;padding:10px 18px;border-radius:99px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}#ts.on{opacity:1}
+</style>
+</head>
+<body>
+<main id="v"></main><nav></nav><div id="ts"></div>
+<script>
+'use strict';
+const $=s=>document.querySelector(s),FA='۰۱۲۳۴۵۶۷۸۹';
+const fa=s=>String(s).replace(/\d/g,d=>FA[d]);
+const en=s=>String(s).replace(/[۰-۹]/g,d=>FA.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const MEALS=['صبحانه','ناهار','شام','میان‌وعده','نوشیدنی','سایر'];
+const UNITS=['گرم','کیلوگرم','عدد','لیوان','فنجان','قاشق','کف دست','بشقاب','پیمانه','سایر'];
+const MON=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+const p2=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+const hm=d=>p2(d.getHours())+':'+p2(d.getMinutes());
+const pd=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c,12)};
+const nid=()=>'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function g2j(gy,gm,gd){const g=[0,31,59,90,120,151,181,212,243,273,304,334],y2=gm>2?gy+1:gy;let days=355666+365*gy+Math.floor((y2+3)/4)-Math.floor((y2+99)/100)+Math.floor((y2+399)/400)+gd+g[gm-1],jy=-1595+33*Math.floor(days/12053);days%=12053;jy+=4*Math.floor(days/1461);days%=1461;if(days>365){jy+=Math.floor((days-1)/365);days=(days-1)%365}return[jy,days<186?1+Math.floor(days/31):7+Math.floor((days-186)/30),1+(days<186?days%31:(days-186)%30)]}
+const J=s=>{const d=pd(s);return g2j(d.getFullYear(),d.getMonth()+1,d.getDate())};
+const jal=s=>{const[y,m,d]=J(s);return fa(d)+' '+MON[m-1]+' '+fa(y)};
+const wd=s=>WD[pd(s).getDay()];
+function lb(){try{return localStorage.getItem('lastbk')||''}catch(e){return''}}
+
+/* ---------- storage: IndexedDB (fallback: localStorage, then memory) ---------- */
+let E=[],mode='idb',db,tab='today',F={q:'',m:'',a:'',b:''},R='7';
+const idb=()=>new Promise((ok,no)=>{const r=indexedDB.open('khorak',1);r.onupgradeneeded=()=>r.result.createObjectStore('e',{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+const tx=(m,f)=>new Promise((ok,no)=>{const t=db.transaction('e',m),q=f(t.objectStore('e'));t.oncomplete=()=>ok(q&&q.result);t.onerror=t.onabort=()=>no(t.error)});
+const ls=()=>{try{localStorage.setItem('khorak',JSON.stringify(E))}catch(e){mode='mem'}};
+async function load(){try{db=await idb();E=await tx('readonly',s=>s.getAll())}catch(e){try{E=JSON.parse(localStorage.getItem('khorak')||'[]');mode='ls'}catch(e2){E=[];mode='mem'}}}
+async function save(l){try{l.forEach(e=>{const i=E.findIndex(x=>x.id==e.id);i<0?E.push(e):E[i]=e});if(mode=='idb')await tx('readwrite',s=>{l.forEach(e=>s.put(e))});else if(mode=='ls')ls()}catch(e){toast('⚠ ذخیره نشد');throw e}}
+async function rm(id){E=E.filter(x=>x.id!=id);if(mode=='idb')await tx('readwrite',s=>s.delete(id));else if(mode=='ls')ls()}
+async function wipe(){E=[];if(mode=='idb')await tx('readwrite',s=>s.clear());else if(mode=='ls')ls()}
+
+/* ---------- helpers ---------- */
+function toast(s){const t=$('#ts');t.textContent=s;t.classList.add('on');clearTimeout(toast.x);toast.x=setTimeout(()=>t.classList.remove('on'),2300)}
+function ask(h,ok,dg,chk){return new Promise(r=>{const m=document.createElement('div');m.className='ov';m.innerHTML=`<div class=dlg>${h}<div class=row><button class="btn${dg?' dg':''}" id=y>${ok||'تأیید'}</button><button class="btn gh" id=n>انصراف</button></div></div>`;document.body.append(m);m.querySelector('#y').onclick=()=>{if(chk&&!chk(m))return toast('عبارت تأیید درست نیست');m.remove();r(true)};m.querySelector('#n').onclick=()=>{m.remove();r(false)}})}
+async function dl(n,x,t){const C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()){try{const P=C.Plugins,r=await P.Filesystem.writeFile({path:n,data:x,directory:"CACHE",encoding:"utf8"});await P.Share.share({title:n,url:r.uri})}catch(e){if(!/cancel/i.test(String(e&&e.message||e)))toast("⚠ فایل ساخته نشد");return}}else{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([x],{type:t}));a.download=n;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4e4)}try{localStorage.setItem("lastbk",ymd(new Date()))}catch(e){}toast("فایل آماده شد ✓")}
+const part=()=>{const v=$('#xr').value;if(v=='all')return[...E];const d=new Date();d.setDate(d.getDate()-+v);const a=ymd(d);return E.filter(e=>e.d>=a)};
+const q=v=>{v=String(v??'');return/[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+function toCsv(L){const o=['id,date,time,jalali,meal,item,amount,unit,kcal,note,hunger,satiety,fav'];L.slice().sort((a,b)=>a.d+a.t<b.d+b.t?-1:1).forEach(e=>e.items.forEach(i=>o.push([e.id,e.d,e.t,jal(e.d),e.m,i.n,i.a,i.u,i.k,e.note,e.h,e.s,e.fav?1:0].map(q).join(','))));return'\ufeff'+o.join('\r\n')}
+function parseCsv(t){const R=[];let r=[],c='',o=0;for(let i=0;i<t.length;i++){const h=t[i];if(o){if(h=='"'){if(t[i+1]=='"'){c+='"';i++}else o=0}else c+=h}else if(h=='"')o=1;else if(h==','){r.push(c);c=''}else if(h=='\n'||h=='\r'){if(h=='\r'&&t[i+1]=='\n')i++;r.push(c);c='';R.push(r);r=[]}else c+=h}if(c||r.length){r.push(c);R.push(r)}return R.filter(x=>x.some(v=>v!==''))}
+function fromCsv(t){const R=parseCsv(t),h=R.shift()||[],G={};R.forEach(r=>{const g=k=>(r[h.indexOf(k)]||'').trim(),key=g('id')||g('date')+g('time')+g('meal');(G[key]=G[key]||{id:g('id'),d:g('date'),t:g('time'),m:g('meal'),note:g('note'),h:g('hunger'),s:g('satiety'),fav:g('fav')=='1',items:[]}).items.push({n:g('item'),a:g('amount'),u:g('unit'),k:g('kcal')})});return Object.values(G)}
+function norm(e){if(!e||typeof e!='object')return null;const d=String(e.d||'').trim(),t=String(e.t||'').trim().match(/^(\d{1,2}):(\d{2})/);if(!/^\d{4}-\d\d-\d\d$/.test(d)||ymd(pd(d))!=d||!t||+t[1]>23||+t[2]>59)return null;const items=(Array.isArray(e.items)?e.items:[]).map(i=>({n:String(i.n||'').trim(),a:String(i.a??'').trim(),u:String(i.u||'').trim(),k:String(i.k??'').trim()})).filter(i=>i.n);if(!items.length)return null;const sc=v=>/^[1-5]$/.test(String(v))?String(v):'';return{id:String(e.id||'')||nid(),d,t:p2(t[1])+':'+t[2],m:MEALS.includes(e.m)?e.m:'سایر',items,note:String(e.note||''),h:sc(e.h),s:sc(e.s),fav:!!e.fav}}
+const sig=e=>e.d+'|'+e.t+'|'+e.m+'|'+e.items.map(i=>i.n+':'+i.a+i.u).join(';');
+async function doImport(f){let raw;try{const t=(await f.text()).replace(/^\ufeff/,''),c=t.trim()[0];raw=(f.name.toLowerCase().endsWith('.json')||c=='{'||c=='[')?(o=>Array.isArray(o)?o:o.entries)(JSON.parse(t)):fromCsv(t)}catch(e){return toast('فایل قابل خواندن نیست')}
+if(!Array.isArray(raw))return toast('ساختار فایل درست نیست');
+const ids=new Set(E.map(e=>e.id)),sg=new Set(E.map(sig)),add=[];let bad=0,dup=0;
+raw.forEach(r=>{const e=norm(r);if(!e){bad++;return}const s=sig(e);if(ids.has(e.id)||sg.has(s)){dup++;return}ids.add(e.id);sg.add(s);add.push(e)});
+if(!await ask(`<h3 style="margin-top:0">نتیجهٔ بررسی فایل</h3><p>رکورد شناسایی‌شده: <b>${fa(raw.length)}</b><br>نامعتبر (رد می‌شوند): ${fa(bad)}<br>تکراری (رد می‌شوند): ${fa(dup)}<br>قابل افزودن: <b>${fa(add.length)}</b></p><p class=m>اطلاعات فعلی دست نمی‌خورد؛ فقط رکوردهای جدید اضافه می‌شوند.</p>`,add.length?'افزودن '+fa(add.length)+' رکورد':'باشه'))return;
+if(add.length){await save(add);render();toast('اطلاعات وارد شد ✓')}}
+
+/* ---------- views ---------- */
+const it=i=>{const x=[i.a&&fa(i.a)+' '+esc(i.u),i.k&&fa(i.k)+' کالری'].filter(Boolean).join(' · ');return esc(i.n)+(x?` <span class=m>(${x})</span>`:'')};
+const ent=e=>`<div class="card en" data-a=edit data-id="${e.id}"><b class=tm>${fa(e.t)}</b><div class=bd><div>${e.items.map(it).join('، ')}</div><small class=m>${e.m}${e.note?' · '+esc(e.note):''}${e.h?' · گرسنگی '+fa(e.h):''}${e.s?' · سیری '+fa(e.s):''}</small></div><button class=ic data-a=fav data-id="${e.id}" aria-label="علاقه‌مندی">${e.fav?'★':'☆'}</button><button class=ic data-a=cp data-id="${e.id}" aria-label="ثبت دوباره برای الان">⧉</button></div>`;
+function vToday(){const t=ymd(new Date()),L=E.filter(e=>e.d==t).sort((a,b)=>a.t<b.t?-1:1),mn=L.filter(e=>MEALS.slice(0,3).includes(e.m)).length,fv=E.filter(e=>e.fav),old=lb();
+return `${mode=='mem'?'<div class="card wr">⚠ ذخیره‌سازی پایدار در این محیط کار نمی‌کند؛ فایل را در مرورگر خودت باز کن.</div>':''}
+<div class=card><div class=m>${wd(t)}</div><h1>${jal(t)}</h1><div>${fa(mn)} وعدهٔ اصلی و ${fa(L.length-mn)} میان‌وعده/نوشیدنی/سایر</div></div>
+<button class="btn big" data-a=new>+ ثبت خوراک جدید</button>
+${E.length>4&&(!old||Date.now()-pd(old)>6048e5)?'<div class="card wr">مدتی است پشتیبان نگرفته‌ای. از «تنظیمات» یک فایل JSON ذخیره کن.</div>':''}
+${fv.length?'<h3>علاقه‌مندی‌ها (با یک لمس برای همین الان ثبت می‌شوند)</h3><div class=chips>'+fv.map(e=>`<button class=chip data-a=cp data-id="${e.id}">★ ${esc(e.items.map(i=>i.n).join('، '))}</button>`).join('')+'</div>':''}
+<h3>امروز</h3>${L.map(ent).join('')||'<p class=m>هنوز چیزی ثبت نشده. با دکمهٔ بالا شروع کن.</p>'}`}
+function hl(){const L=E.filter(e=>(!F.m||e.m==F.m)&&(!F.a||e.d>=F.a)&&(!F.b||e.d<=F.b)&&(!F.q||e.note.includes(F.q)||e.items.some(i=>i.n.includes(F.q))));return[...new Set(L.map(e=>e.d))].sort().reverse().map(d=>`<h3>${wd(d)} ${jal(d)}</h3>`+L.filter(e=>e.d==d).sort((a,b)=>a.t<b.t?-1:1).map(ent).join('')).join('')||'<p class=m>چیزی پیدا نشد.</p>'}
+const vHist=()=>`<h2>سوابق</h2><input class=in id=hq placeholder="جست‌وجوی نام غذا یا نوشیدنی…" value="${esc(F.q)}"><select class=in id=hmt style="margin:8px 0"><option value="">همهٔ وعده‌ها</option>${MEALS.map(m=>`<option${F.m==m?' selected':''}>${m}</option>`).join('')}</select><small class=m>از تاریخ / تا تاریخ</small><div class=row><input class=in type=date id=hfr value="${F.a}"><input class=in type=date id=hto value="${F.b}"></div><div id=hl>${hl()}</div>`;
+function vRep(){const n=+R,ds=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);ds.push(ymd(d))}
+const L=E.filter(e=>e.d>=ds[0]&&e.d<=ds[n-1]),c=ds.map(d=>L.filter(e=>e.d==d).length),mx=Math.max(1,...c),fo={},hr={};
+L.forEach(e=>{e.items.forEach(i=>fo[i.n]=(fo[i.n]||0)+1);const h=+e.t.slice(0,2);hr[h]=(hr[h]||0)+1});
+const top=(o,k)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,k),li=a=>a.length?a.join('<br>'):'<span class=m>—</span>';
+return `<h2>گزارش</h2><div class=chips>${[['1','امروز'],['7','هفته'],['30','ماه']].map(([v,l])=>`<button class="chip${R==v?' sel':''}" data-a=rng data-v=${v}>${l}</button>`).join('')}</div>
+<div class=card style="margin-top:12px"><div>تعداد ثبت‌ها: <b>${fa(L.length)}</b></div><div>میانگین در روز: <b>${fa((L.length/n).toFixed(1))}</b> ثبت</div></div>
+<div class=card><div class=bars>${c.map((v,i)=>`<div class=col title="${jal(ds[i])}">${n<=7?fa(v):''}<div class=bar style="height:${v/mx*80}%"></div>${n<=7?fa(J(ds[i])[2]):''}</div>`).join('')}</div></div>
+<h3>خوراکی‌های پرتکرار</h3><div class=card>${li(top(fo,5).map(([k,v])=>esc(k)+' · '+fa(v)+' بار'))}</div>
+<h3>ساعت‌هایی که معمولاً می‌خورم</h3><div class=card>${li(top(hr,3).map(([h,v])=>fa(h)+' تا '+fa(+h+1)+' · '+fa(v)+' بار'))}</div>`}
+function vSet(){const b=lb();return `<h2>تنظیمات و پشتیبان‌گیری</h2>
+<div class=card>ذخیره‌سازی: <b>${mode=='idb'?'دائمی (IndexedDB)':mode=='ls'?'LocalStorage':'⚠ موقت'}</b><br><small class=m>تعداد ثبت‌ها: ${fa(E.length)} · آخرین پشتیبان: ${b?jal(b):'هنوز نگرفته‌ای'}</small></div>
+<h3>خروجی گرفتن</h3><select class=in id=xr><option value=all>همهٔ سوابق</option><option value=7>۷ روز اخیر</option><option value=30>۳۰ روز اخیر</option></select>
+<div class=row><button class=btn data-a=xj>JSON (پشتیبان کامل)</button><button class="btn gh" data-a=xc>CSV (برای Excel)</button></div>
+<h3>ورودی گرفتن</h3><button class="btn gh" data-a=imp>انتخاب فایل CSV یا JSON</button><input type=file id=imp hidden accept=".csv,.json"><small class=m>فقط رکوردهای جدید اضافه می‌شوند؛ چیزی پاک یا جایگزین نمی‌شود.</small>
+<h3>راهنما</h3><div class=card><small><b>نصب روی اندروید:</b> پوشهٔ برنامه را روی یک هاست رایگان HTTPS (مثل Netlify Drop یا GitHub Pages) بگذار، لینکش را با Chrome گوشی باز کن و از منوی ⋮ گزینهٔ «Install app / نصب برنامه» را بزن. بعد از نصب بدون اینترنت هم کار می‌کند.<br><b>محل ذخیره:</b> فقط داخل مرورگر همین گوشی (IndexedDB) و جایی ارسال نمی‌شود. پاک کردن اطلاعات سایت یا حذف برنامه یعنی حذف داده‌ها؛ پس مرتب JSON پشتیبان بگیر.<br><b>بازیابی:</b> فایل JSON را با «ورودی گرفتن» انتخاب کن؛ قبل از افزودن، تعداد رکوردها، موارد نامعتبر و تکراری را می‌بینی.</small></div>
+<button class="btn dg" data-a=wipe>حذف کامل همهٔ اطلاعات</button>`}
+const NAV=[['today','🏠','امروز'],['hist','📖','سوابق'],['rep','📊','گزارش'],['set','⚙️','تنظیمات']];
+function render(){$('#v').innerHTML=({today:vToday,hist:vHist,rep:vRep,set:vSet})[tab]();$('nav').innerHTML=NAV.map(([k,i,t])=>`<button data-a=tab data-k=${k} class="${k==tab?'on':''}">${i}<br>${t}</button>`).join('')}
+
+/* ---------- form ---------- */
+const row=i=>`<div class=ir><input class="in nm" list=nl placeholder="نام (مثلاً نان سنگک)" value="${esc(i.n)}"><button type=button class=ic data-a=rmrow aria-label="حذف ماده">✕</button><input class=in inputmode=decimal placeholder="مقدار" value="${esc(i.a)}"><select class=in>${UNITS.map(u=>`<option${u==i.u?' selected':''}>${u}</option>`).join('')}</select><input class=in inputmode=numeric placeholder="کالری" value="${esc(i.k)}"></div>`;
+const grp=(g,v)=>`<div class=chips data-g=${g}>${[1,2,3,4,5].map(i=>`<button type=button class="chip${v==i?' sel':''}" data-a=pick data-v=${i}>${fa(i)}</button>`).join('')}</div>`;
+function form(e){const n=new Date(),H=n.getHours(),x=e||{d:ymd(n),t:hm(n),m:H<10?'صبحانه':H<15?'ناهار':H<18?'میان‌وعده':H<23?'شام':'سایر',items:[{}],note:'',h:'',s:''},[hh,mm]=x.t.split(':'),names=[...new Set(E.flatMap(e=>e.items.map(i=>i.n)))],opt=(len,v)=>Array.from({length:len},(_,i)=>`<option value=${p2(i)}${p2(i)==v?' selected':''}>${fa(p2(i))}</option>`).join('');
+const s=document.createElement('div');s.className='sheet';s.dataset.id=e?e.id:'';
+s.innerHTML=`<div class=row><h2 style="flex:1;margin:0">${e?'ویرایش ثبت':'ثبت خوراک جدید'}</h2><button class=ic data-a=close aria-label="بستن">✕</button></div>
+<h3>تاریخ و ساعت (۲۴ ساعته)</h3><div class=row><input class=in type=date id=fd value="${x.d}"><div class=row dir=ltr style="width:160px"><select class=in id=fh>${opt(24,hh)}</select>:<select class=in id=fmn>${opt(60,mm)}</select></div></div><small class=m id=fj>${wd(x.d)} ${jal(x.d)}</small>
+<h3>نوع وعده</h3><div class=chips id=ml>${MEALS.map(m=>`<button type=button class="chip${m==x.m?' sel':''}" data-a=meal>${m}</button>`).join('')}</div>
+<h3>خوراکی‌ها و مقدار (مقدار و کالری اختیاری است)</h3><div id=its>${x.items.map(row).join('')}</div><button type=button class="btn gh" data-a=addrow>+ افزودن ماده</button>
+<datalist id=nl>${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+<h3>گرسنگی قبل از غذا (اختیاری)</h3>${grp('h',x.h)}<h3>سیری بعد از غذا (اختیاری)</h3>${grp('s',x.s)}
+<h3>توضیحات (اختیاری)</h3><textarea class=in id=nt rows=2 placeholder="مثلاً: پرچرب بود، خارج از برنامه بود">${esc(x.note)}</textarea>
+<div class="ft row"><button class=btn style="flex:2" data-a=save>ذخیره اطلاعات</button>${e?'<button class="btn dg" data-a=del>حذف</button>':''}</div>`;
+document.body.append(s)}
+async function saveForm(){const s=$('.sheet'),its=[...s.querySelectorAll('.ir')].map(r=>{const[n,a,u,k]=r.querySelectorAll('input,select'),A=en(a.value.trim());return{n:n.value.trim(),a:A,u:A?u.value:'',k:en(k.value.trim())}}).filter(i=>i.n);
+if(!its.length)return toast('حداقل یک خوراک وارد کن');const d=$('#fd').value;if(!d)return toast('تاریخ را انتخاب کن');
+const pk=g=>((s.querySelector(`[data-g=${g}] .sel`)||{dataset:{}}).dataset.v)||'',old=E.find(x=>x.id==s.dataset.id);
+await save([{id:old?old.id:nid(),d,t:$('#fh').value+':'+$('#fmn').value,m:(s.querySelector('#ml .sel')||{}).textContent||'سایر',items:its,note:$('#nt').value.trim(),h:pk('h'),s:pk('s'),fav:old?old.fav:false}]);
+s.remove();render();toast('با موفقیت ذخیره شد ✓')}
+
+/* ---------- events ---------- */
+document.addEventListener('click',async ev=>{const b=ev.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,e=E.find(x=>x.id==b.dataset.id),s=$('.sheet');
+try{
+if(a=='tab'){tab=b.dataset.k;render();scrollTo(0,0)}
+else if(a=='new')form();
+else if(a=='edit')form(e);
+else if(a=='fav'){e.fav=!e.fav;await save([e]);render()}
+else if(a=='cp'){const n=new Date();await save([{...e,id:nid(),d:ymd(n),t:hm(n),fav:false,h:'',s:'',items:e.items.map(i=>({...i}))}]);render();toast('برای همین الان ثبت شد ✓')}
+else if(a=='meal'){b.parentNode.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')}
+else if(a=='pick'){const w=b.classList.contains('sel');b.parentNode.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel'));if(!w)b.classList.add('sel')}
+else if(a=='addrow')$('#its').insertAdjacentHTML('beforeend',row({}));
+else if(a=='rmrow'){if(s.querySelectorAll('.ir').length>1)b.closest('.ir').remove();else toast('حداقل یک ماده لازم است')}
+else if(a=='close')s.remove();
+else if(a=='save')await saveForm();
+else if(a=='del'){if(await ask('<p>این ثبت حذف شود؟</p>','حذف',1)){await rm(s.dataset.id);s.remove();render();toast('حذف شد')}}
+else if(a=='rng'){R=b.dataset.v;render()}
+else if(a=='xj')dl('khorak-backup-'+ymd(new Date())+'.json',JSON.stringify({app:'dafterche-khorak',version:1,exported:new Date().toISOString(),entries:part()},null,1),'application/json');
+else if(a=='xc')dl('khorak-'+ymd(new Date())+'.csv',toCsv(part()),'text/csv;charset=utf-8');
+else if(a=='imp')$('#imp').click();
+else if(a=='wipe'){if(await ask('<p><b>همهٔ اطلاعات ثبت‌شده پاک می‌شود و برگشت‌پذیر نیست.</b> اگر پشتیبان نگرفته‌ای، اول JSON بگیر.</p><p>برای تأیید بنویس: <b>حذف</b></p><input class=in id=cf>','حذف همه',1,m=>m.querySelector('#cf').value.trim()=='حذف')){await wipe();render();toast('همه چیز پاک شد')}}
+}catch(x){console.error(x)}});
+document.addEventListener('input',ev=>{const t=ev.target;if(['hq','hmt','hfr','hto'].includes(t.id)){F={q:$('#hq').value.trim(),m:$('#hmt').value,a:$('#hfr').value,b:$('#hto').value};$('#hl').innerHTML=hl()}if(t.id=='fd')$('#fj').textContent=t.value?wd(t.value)+' '+jal(t.value):''});
+document.addEventListener('change',async ev=>{if(ev.target.id=='imp'&&ev.target.files[0]){await doImport(ev.target.files[0]);ev.target.value=''}});
+load().then(()=>{render();try{navigator.storage.persist()}catch(e){}});
+if('serviceWorker'in navigator&&/^https?:/.test(location.protocol))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
